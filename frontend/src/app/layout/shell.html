@@ -1,0 +1,137 @@
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-row">
+      <img src="/images/GP_LOGO.png" alt="Grupo Planet" class="sidebar-brand-logo">
+      <div class="sidebar-brand-text">
+        <span class="sidebar-brand-name">Prueba_GPLANET</span>
+        <span class="sidebar-brand-sub">prueba-gplanet.gplanet.cl</span>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a routerLink="/inicio" routerLinkActive="active" class="nav-link" title="Inicio">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+      </svg>
+      <span class="nav-link-label">Inicio</span>
+    </a>
+
+    <!-- Secciones (generadas desde secciones.config.ts) -->
+    @for (s of secciones(); track s.path) {
+      <a [routerLink]="'/' + s.path" routerLinkActive="active" class="nav-link" [title]="s.label">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="s.icon"/>
+        </svg>
+        <span class="nav-link-label">{{ s.label }}</span>
+      </a>
+    }
+
+    @if (auth.isAdmin()) {
+      <div class="sidebar-section-title">Administración</div>
+
+      <a routerLink="/admin/usuarios" routerLinkActive="active" class="nav-link" title="Usuarios">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+        <span class="nav-link-label">Usuarios</span>
+      </a>
+    }
+  </nav>
+
+  <div class="notif-wrapper">
+    <button class="notif-trigger" [class.has-pending]="items().length > 0"
+      (click)="toggleNotif(); $event.stopPropagation()" title="Notificaciones">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+      </svg>
+      @if (items().length > 0) {
+        <span class="notif-badge">{{ items().length }}</span>
+      }
+      <span class="nav-link-label" style="margin-left:4px">Notificaciones</span>
+    </button>
+
+    @if (notifOpen()) {
+      <div class="notif-panel" (click)="$event.stopPropagation()">
+        <div class="notif-panel-header">
+          <span>Notificaciones</span>
+          <button class="modal-close" style="font-size:18px;line-height:1" (click)="closeNotif()">×</button>
+        </div>
+
+        @if (items().length === 0) {
+          <div class="notif-empty">
+            <p>Sin novedades</p>
+          </div>
+        } @else {
+          <div class="notif-list">
+            @for (item of items(); track item.id) {
+              <div class="notif-item">
+                <div class="notif-item-body">
+                  <div class="notif-item-title">{{ item.titulo }}</div>
+                  @if (item.mensaje) {
+                    <div class="notif-item-sub">{{ item.mensaje }}</div>
+                  }
+                  <div class="notif-item-date">{{ item.fecha_creacion }}</div>
+                  <div style="display:flex; gap:6px; margin-top:6px;">
+                    @if (item.link) {
+                      <a [routerLink]="item.link" class="btn btn-sm btn-primary" style="font-size:11px;padding:3px 10px"
+                        (click)="marcarLeida(item); closeNotif()">
+                        Ver
+                      </a>
+                    }
+                    <button class="btn btn-sm btn-outline" style="font-size:11px;padding:3px 10px"
+                      (click)="marcarLeida(item)">
+                      Marcar como leída
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+        <div style="padding:10px 14px;border-top:1px solid #f0f0f0;text-align:center">
+          <a routerLink="/notificaciones" class="btn btn-sm btn-primary" style="width:100%;font-size:12px"
+            (click)="closeNotif()">
+            Ver todas las notificaciones
+          </a>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="sidebar-user">
+    <div class="sidebar-user-row">
+      <div class="sidebar-user-avatar">{{ auth.initials() }}</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name">{{ auth.user()?.nombre }}</div>
+        <div class="sidebar-user-email">{{ auth.user()?.email }}</div>
+      </div>
+    </div>
+    <div class="sidebar-user-badge" style="margin-bottom:8px">
+      <span class="badge badge-rol-{{ auth.user()?.rol }}">{{ auth.rolLabel() }}</span>
+    </div>
+    <button class="btn-logout" (click)="auth.logout()">Cerrar sesión →</button>
+  </div>
+</aside>
+
+<button class="sidebar-toggle" (click)="toggleSidebar()" [title]="collapsed ? 'Expandir menú' : 'Colapsar menú'">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="15 18 9 12 15 6"/>
+  </svg>
+</button>
+
+<main class="main-content">
+  <router-outlet />
+  <footer class="app-footer">
+    © 2026 Grupo Planet. Todos los derechos reservados. Uso exclusivo para personal autorizado.
+  </footer>
+</main>
+
+<div class="toast-container">
+  @for (toast of notifications.toasts(); track toast.id) {
+    <div class="toast toast-{{ toast.type }}">{{ toast.message }}</div>
+  }
+</div>

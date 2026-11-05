@@ -1,0 +1,26 @@
+@if (total() > 0) {
+  <div class="paginator">
+    <span class="paginator-info">
+      Mostrando {{ from() }}–{{ to() }} de {{ total() }}
+    </span>
+    <div class="paginator-pages">
+      <button class="paginator-btn" [disabled]="page() === 1" (click)="prev()">‹</button>
+      @for (p of pages(); track $index) {
+        @if (p === null) {
+          <span class="paginator-ellipsis">…</span>
+        } @else {
+          <button class="paginator-btn" [class.active]="p === page()" (click)="goTo(p)">{{ p }}</button>
+        }
+      }
+      <button class="paginator-btn" [disabled]="page() === totalPages()" (click)="next()">›</button>
+    </div>
+    <div class="paginator-size">
+      <label>Por página:</label>
+      <select [ngModel]="pageSize()" (ngModelChange)="pageSizeChange.emit(+$event)">
+        @for (opt of pageSizeOptions(); track opt) {
+          <option [value]="opt">{{ opt }}</option>
+        }
+      </select>
+    </div>
+  </div>
+}

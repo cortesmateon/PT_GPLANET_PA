@@ -1,0 +1,154 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Usuarios</h1>
+    <p class="page-subtitle">Gestión de acceso a Prueba_GPLANET</p>
+  </div>
+  <button class="btn btn-primary" (click)="openModal()">+ Agregar Usuario</button>
+</div>
+
+@if (loading()) {
+  <div class="page-loading"><div class="spinner"></div></div>
+} @else {
+  <div class="card">
+    <div class="filters-row">
+      <input
+        type="text"
+        class="form-control filter-input"
+        placeholder="Buscar por nombre o correo..."
+        [ngModel]="buscar()"
+        (ngModelChange)="setBuscar($event)"
+      />
+    </div>
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Última conexión</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of paginated(); track u.id) {
+            <tr>
+              <td>
+                <div class="user-cell">
+                  <div class="user-avatar-sm">{{ u.nombre[0].toUpperCase() }}</div>
+                  <span>{{ u.nombre }}{{ esSelf(u) ? ' (tú)' : '' }}</span>
+                </div>
+              </td>
+              <td>{{ u.email }}</td>
+              <td>
+                @if (esSelf(u)) {
+                  <span class="badge badge-rol-{{ u.rol }}">{{ roles()[u.rol] || u.rol }}</span>
+                } @else {
+                  <select class="form-select" style="width:auto;padding:4px 8px;font-size:13px"
+                    [ngModel]="u.rol" (ngModelChange)="cambiarRol(u, $event)">
+                    @for (r of rolesList(); track r.value) {
+                      <option [value]="r.value">{{ r.label }}</option>
+                    }
+                  </select>
+                }
+              </td>
+              <td style="font-size:.82rem; color:var(--muted);">
+                {{ u.ultimo_login ? (u.ultimo_login | date:'dd-MM-yyyy HH:mm') : 'Nunca' }}
+              </td>
+              <td>
+                <span class="badge" [class.badge-APROBADO]="u.activo" [class.badge-RECHAZADO]="!u.activo">
+                  {{ u.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>
+                @if (esSelf(u)) {
+                  <span class="user-protected">Tu cuenta</span>
+                } @else {
+                  <button class="btn btn-sm" [class.btn-danger]="u.activo" [class.btn-primary]="!u.activo"
+                    (click)="pedirToggle(u)">
+                    {{ u.activo ? 'Desactivar' : 'Activar' }}
+                  </button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="table-empty">Sin usuarios registrados</td></tr>
+          }
+        </tbody>
+      </table>
+      <app-paginator
+        [total]="filtrados().length"
+        [page]="page()"
+        [pageSize]="pageSize()"
+        (pageChange)="page.set($event)"
+        (pageSizeChange)="setPageSize($event)" />
+    </div>
+  </div>
+}
+
+@if (confirmToggle()) {
+  <div class="modal-backdrop" (click)="cancelarToggle()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Confirmar acción</h3>
+        <button class="modal-close" (click)="cancelarToggle()">×</button>
+      </div>
+      <div class="modal-body">
+        <p>¿{{ confirmToggle()!.activo ? 'Desactivar' : 'Activar' }} al usuario
+        <strong>{{ confirmToggle()!.nombre }}</strong>?</p>
+        @if (confirmToggle()!.activo) {
+          <p style="color:var(--muted);font-size:13px">El usuario no podrá acceder mientras esté desactivado.</p>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="cancelarToggle()">Cancelar</button>
+        <button class="btn" [class.btn-danger]="confirmToggle()!.activo" [class.btn-primary]="!confirmToggle()!.activo"
+          (click)="confirmarToggle()">
+          {{ confirmToggle()!.activo ? 'Desactivar' : 'Activar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showModal()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Agregar Usuario</h3>
+        <button class="modal-close" (click)="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Nombre</label>
+          <input type="text" class="form-control" placeholder="Nombre completo"
+            [ngModel]="nuevoUsuario().nombre"
+            (ngModelChange)="nuevoUsuario.update(u => ({...u, nombre: $event}))" />
+        </div>
+        <div class="form-group" style="margin-top:16px">
+          <label class="form-label">Correo</label>
+          <input type="email" class="form-control" placeholder="correo@ejemplo.cl"
+            [ngModel]="nuevoUsuario().email"
+            (ngModelChange)="nuevoUsuario.update(u => ({...u, email: $event}))" />
+        </div>
+        <div class="form-group" style="margin-top:16px">
+          <label class="form-label">Rol</label>
+          <select class="form-select" [ngModel]="nuevoUsuario().rol" (ngModelChange)="nuevoUsuario.update(u => ({...u, rol: $event}))">
+            @for (r of rolesList(); track r.value) {
+              <option [value]="r.value">{{ r.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+        <button class="btn btn-primary"
+          [disabled]="saving() || !formValido()"
+          (click)="agregar()">
+          {{ saving() ? 'Agregando...' : 'Agregar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
