@@ -57,8 +57,15 @@ Dependencias Python: solo `flask` (ver `requirements.txt`). Frontend: `frontend/
   barra lateral (`layout/shell.html`) y el ruteo (`app.routes.ts`) se generan
   desde el arreglo `SECCIONES`. Para agregar una sección, agrega un objeto ahí.
 - Cada sección usa por defecto el componente genérico `features/seccion/` (una
-  pantalla en blanco). Cuando tenga funcionalidad real, crea su propio
-  componente y apúntalo en `app.routes.ts`.
+  pantalla en blanco). Para darle componente propio, créalo en
+  `features/<seccion>/` y regístralo en el mapa `COMPONENTES_SECCION` de
+  `app.routes.ts` (clave = `path` de la sección). Las secciones que no estén en
+  ese mapa siguen cayendo al genérico.
+- Secciones actuales: `seccion-1` (genérico) y `seccion-2`
+  (`features/seccion-2/`, componente propio).
+- Las tarjetas de `/inicio` se generan desde `SECCIONES`; el contenedor
+  `.sistemas-grid` es flex centrado (`justify-content: center`, `gap: 24px`,
+  `flex-wrap: wrap`) en `frontend/src/styles.css`.
 - **Secciones por rol**: agrega `roles: ['admin']` (u otro) a una sección para
   que solo la vean esos roles. Sin `roles`, la ven todos los autenticados.
 

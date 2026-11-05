@@ -220,9 +220,12 @@ body.sidebar-collapsed .main-content { margin-left: var(--sidebar-slim-w); }
 
 /* === Tiles de sistemas (Dashboard) ===================================== */
 .sistemas-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-  gap: 18px; animation: fadeUp .45s ease .1s both;
+  display: flex; flex-wrap: wrap;
+  justify-content: center; align-items: stretch;
+  gap: 24px; animation: fadeUp .45s ease .1s both;
 }
+/* Ancho base de cada tarjeta: crecen hasta 340px y se envuelven centradas. */
+.sistemas-grid > .sistema-card { flex: 0 1 300px; max-width: 340px; }
 .sistema-card {
   position: relative; display: flex; flex-direction: column; gap: 16px;
   background: var(--card); border: 1px solid var(--border);
@@ -513,7 +516,8 @@ input[type="file"]:hover { border-color: var(--accent); background: #fff8f5; }
 @media (max-width: 900px) {
   .main-content { padding: 20px 16px 32px; }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
-  .sistemas-grid { grid-template-columns: 1fr; }
+  .sistemas-grid { gap: 16px; }
+  .sistemas-grid > .sistema-card { flex: 1 1 100%; max-width: none; }
   .dash-hero-title { font-size: 22px; }
 }
 
